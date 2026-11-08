@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NP BOT</title>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#f97316">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link id="manifest-link" rel="manifest">
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Hide number input spinners for cleaner look */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield; /* Firefox */
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col items-center p-4 sm:p-6">
+
+    <div class="w-full max-w-md w-full pb-10">
+        <!-- Header -->
+        <header class="text-center mb-6 mt-4">
+            <h1 class="text-3xl font-bold text-orange-500 tracking-tight">NP BOT</h1>
+            <p class="text-sm text-gray-500 mt-1">Calcolatore Infusione Medica</p>
+        </header>
+
+        <!-- Input Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
+            <h2 class="text-lg font-semibold mb-4 text-gray-700">Parametri</h2>
+            
+            <div class="space-y-5">
+                <div>
+                    <label for="peso" class="block text-sm font-medium text-gray-600 mb-1">Peso paziente (kg)</label>
+                    <input type="number" id="peso" inputmode="decimal" step="any" value="1" 
+                           class="w-full text-2xl p-4 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
+                           placeholder="Es. 70">
+                </div>
+
+                <div>
+                    <label for="velocita" class="block text-sm font-medium text-gray-600 mb-1">Velocità d'infusione (ml/h)</label>
+                    <input type="number" id="velocita" inputmode="decimal" step="any" value="3.8" 
+                           class="w-full text-2xl p-4 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
+                           placeholder="Es. 3.8">
+                </div>
+            </div>
+        </div>
+
+        <!-- Output Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <h2 class="text-lg font-semibold mb-4 text-gray-700">Risultati</h2>
+            
+            <div class="space-y-3">
+                <!-- Result Rows -->
+                <div class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                    <span class="text-gray-500 font-medium">RG <span class="text-xs font-normal">(mg/kg/min)</span></span>
+                    <span id="out-rg" class="text-xl font-bold text-gray-900">-</span>
+                </div>
+                
+                <div class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                    <span class="text-gray-500 font-medium">AA <span class="text-xs font-normal">(g/kg/die)</span></span>
+                    <span id="out-aa" class="text-xl font-bold text-gray-900">-</span>
+                </div>
+
+                <div class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                    <span class="text-gray-500 font-medium">L <span class="text-xs font-normal">(g/kg/die)</span></span>
+                    <span id="out-l" class="text-xl font-bold text-gray-900">-</span>
+                </div>
+
+                <div class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                    <span class="text-gray-500 font-medium">Na <span class="text-xs font-normal">(mEq/kg/die)</span></span>
+                    <span id="out-na" class="text-xl font-bold text-gray-900">-</span>
+                </div>
+
+                <div class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                    <span class="text-gray-500 font-medium">Ca <span class="text-xs font-normal">(mg/kg/die)</span></span>
+                    <span id="out-ca" class="text-xl font-bold text-gray-900">-</span>
+                </div>
+
+                <div class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                    <span class="text-gray-500 font-medium">K <span class="text-xs font-normal">(mEq/kg/die)</span></span>
+                    <span id="out-k" class="text-xl font-bold text-gray-900">-</span>
+                </div>
+
+                <div class="flex justify-between items-center py-3 mt-2 bg-orange-50 px-4 rounded-lg">
+                    <span class="text-orange-800 font-bold">Qi NP</span>
+                    <span id="out-qinp" class="text-2xl font-black text-orange-600">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputPeso = document.getElementById('peso');
+            const inputVelocita = document.getElementById('velocita');
+
+            // Output elements
+            const outRG = document.getElementById('out-rg');
+            const outAA = document.getElementById('out-aa');
+            const outL = document.getElementById('out-l');
+            const outNa = document.getElementById('out-na');
+            const outCa = document.getElementById('out-ca');
+            const outK = document.getElementById('out-k');
+            const outQiNP = document.getElementById('out-qinp');
+
+            function updateCalculations() {
+                const peso = parseFloat(inputPeso.value);
+                const velocita = parseFloat(inputVelocita.value);
+
+                // Validation and Zero check
+                if (isNaN(peso) || isNaN(velocita) || peso <= 0) {
+                    resetOutputs();
+                    return;
+                }
+
+                // Formulas as requested
+                // RG (mg/kg/min): (velocità * 9 / 6) / peso
+                const rg = (velocita * 9 / 6) / peso;
+                
+                // AA (g/kg/die): ((velocità * 24) * 7) / (320 * peso)
+                const aa = ((velocita * 24) * 7) / (320 * peso);
+                
+                // L (g/kg/die): ((velocità * 24) * 6) / (320 * peso)
+                const l = ((velocita * 24) * 6) / (320 * peso);
+                
+                // Na (mEq/kg/die): ((velocità * 24) * 8) / (320 * peso)
+                const na = ((velocita * 24) * 8) / (320 * peso);
+                
+                // Ca (mg/kg/die): ((velocità * 24) * 144.9) / (320 * peso)
+                const ca = ((velocita * 24) * 144.9) / (320 * peso);
+                
+                // K (mEq/kg/die): ((velocità * 24) * 3.99) / (320 * peso)
+                const k = ((velocita * 24) * 3.99) / (320 * peso);
+                
+                // Qi NP: (velocità * 24) / peso
+                const qinp = (velocita * 24) / peso;
+
+                // Update UI rounded to 2 decimal places
+                outRG.textContent = rg.toFixed(2);
+                outAA.textContent = aa.toFixed(2);
+                outL.textContent = l.toFixed(2);
+                outNa.textContent = na.toFixed(2);
+                outCa.textContent = ca.toFixed(2);
+                outK.textContent = k.toFixed(2);
+                outQiNP.textContent = qinp.toFixed(2);
+            }
+
+            function resetOutputs() {
+                const dash = "-";
+                outRG.textContent = dash;
+                outAA.textContent = dash;
+                outL.textContent = dash;
+                outNa.textContent = dash;
+                outCa.textContent = dash;
+                outK.textContent = dash;
+                outQiNP.textContent = dash;
+            }
+
+            // Attach event listeners for real-time calculation
+            inputPeso.addEventListener('input', updateCalculations);
+            inputVelocita.addEventListener('input', updateCalculations);
+
+            // Run once on load to populate defaults
+            updateCalculations();
+        });
+    </script>
+
+    <!-- PWA Installation Script -->
+    <script>
+        // 1. Genera l'icona dinamicamente in formato SVG (Croce medica arancione)
+        const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+            <rect width="512" height="512" rx="112" fill="#f97316"/>
+            <path d="M256 160 v192 M160 256 h192" stroke="white" stroke-width="48" stroke-linecap="round"/>
+        </svg>`;
+        const iconDataUri = 'data:image/svg+xml;base64,' + btoa(svgIcon);
+
+        // 2. Genera il Manifest per l'installazione
+        const manifest = {
+            name: "NP BOT",
+            short_name: "NP BOT",
+            description: "Calcolatore Infusione Medica",
+            start_url: window.location.href.split('?')[0] || ".",
+            display: "standalone",
+            background_color: "#f3f4f6",
+            theme_color: "#f97316",
+            icons: [{
+                src: iconDataUri,
+                sizes: "512x512",
+                type: "image/svg+xml",
+                purpose: "any maskable"
+            }]
+        };
+
+        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+        document.getElementById('manifest-link').href = URL.createObjectURL(manifestBlob);
+
+        // La registrazione del Service Worker tramite "blob:" è stata rimossa
+        // poiché non supportata per motivi di sicurezza nei browser.
+        // Il file manifest generato sopra è sufficiente per i convertitori Web-to-APK
+        // e per la funzione "Aggiungi a schermata Home" nella maggior parte dei dispositivi.
+    </script>
+</body>
+</html>
