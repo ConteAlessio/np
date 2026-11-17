@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NP STANDARD</title>
+    <title>NP BOT</title>
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#f97316">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -35,14 +35,20 @@
     <div class="w-full max-w-md w-full pb-10">
         <!-- Header -->
         <header class="text-center mb-6 mt-4">
-            <h1 class="text-3xl font-bold text-orange-500 tracking-tight">NP STANDARD</h1>
-            <p class="text-sm text-gray-500 mt-1">Calcolatore Apporti (w/lipidi)</p>
+            <h1 class="text-3xl font-bold text-orange-500 tracking-tight">NP BOT</h1>
+            <p class="text-sm text-gray-500 mt-1">Calcolatore Infusione Medica</p>
         </header>
 
         <!-- Input Section -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
             <h2 class="text-lg font-semibold mb-4 text-gray-700">Parametri</h2>
             
+            <!-- Interruttore Con/Senza Lipidi -->
+            <div class="flex bg-gray-100 rounded-xl p-1 mb-5">
+                <button id="btn-con-lipidi" class="flex-1 py-2 text-sm font-bold rounded-lg bg-white shadow-sm text-orange-500 transition-all">Con lipidi</button>
+                <button id="btn-senza-lipidi" class="flex-1 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-gray-600 transition-all">Senza lipidi</button>
+            </div>
+
             <div class="space-y-5">
                 <div>
                     <label for="peso" class="block text-sm font-medium text-gray-600 mb-1">Peso paziente (kg)</label>
@@ -96,6 +102,11 @@
                     <span id="out-k" class="text-xl font-bold text-gray-900">-</span>
                 </div>
 
+                <div class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                    <span class="text-gray-500 font-medium">P <span class="text-xs font-normal">(mg/kg/die)</span></span>
+                    <span id="out-p" class="text-xl font-bold text-gray-900">-</span>
+                </div>
+
                 <div class="flex justify-between items-center py-3 mt-2 bg-orange-50 px-4 rounded-lg">
                     <span class="text-orange-800 font-bold">Qi NP</span>
                     <span id="out-qinp" class="text-2xl font-black text-orange-600">-</span>
@@ -117,7 +128,31 @@
             const outNa = document.getElementById('out-na');
             const outCa = document.getElementById('out-ca');
             const outK = document.getElementById('out-k');
+            const outP = document.getElementById('out-p');
             const outQiNP = document.getElementById('out-qinp');
+
+            // Logica Interruttore Lipidi
+            const btnConLipidi = document.getElementById('btn-con-lipidi');
+            const btnSenzaLipidi = document.getElementById('btn-senza-lipidi');
+            let hasLipidi = true;
+
+            btnConLipidi.addEventListener('click', () => {
+                hasLipidi = true;
+                btnConLipidi.classList.add('bg-white', 'shadow-sm', 'text-orange-500', 'font-bold');
+                btnConLipidi.classList.remove('text-gray-400', 'font-medium');
+                btnSenzaLipidi.classList.remove('bg-white', 'shadow-sm', 'text-orange-500', 'font-bold');
+                btnSenzaLipidi.classList.add('text-gray-400', 'font-medium');
+                updateCalculations();
+            });
+
+            btnSenzaLipidi.addEventListener('click', () => {
+                hasLipidi = false;
+                btnSenzaLipidi.classList.add('bg-white', 'shadow-sm', 'text-orange-500', 'font-bold');
+                btnSenzaLipidi.classList.remove('text-gray-400', 'font-medium');
+                btnConLipidi.classList.remove('bg-white', 'shadow-sm', 'text-orange-500', 'font-bold');
+                btnConLipidi.classList.add('text-gray-400', 'font-medium');
+                updateCalculations();
+            });
 
             function updateCalculations() {
                 const peso = parseFloat(inputPeso.value);
@@ -129,27 +164,29 @@
                     return;
                 }
 
-                // Formulas as requested
-                // RG (mg/kg/min): (velocità * 9 / 6) / peso
-                const rg = (velocita * 9 / 6) / peso;
-                
-                // AA (g/kg/die): ((velocità * 24) * 7) / (320 * peso)
-                const aa = ((velocita * 24) * 7) / (320 * peso);
-                
-                // L (g/kg/die): ((velocità * 24) * 6) / (320 * peso)
-                const l = ((velocita * 24) * 6) / (320 * peso);
-                
-                // Na (mEq/kg/die): ((velocità * 24) * 8) / (320 * peso)
-                const na = ((velocita * 24) * 8) / (320 * peso);
-                
-                // Ca (mg/kg/die): ((velocità * 24) * 144.9) / (320 * peso)
-                const ca = ((velocita * 24) * 144.9) / (320 * peso);
-                
-                // K (mEq/kg/die): ((velocità * 24) * 3.99) / (320 * peso)
-                const k = ((velocita * 24) * 3.99) / (320 * peso);
-                
-                // Qi NP: (velocità * 24) / peso
-                const qinp = (velocita * 24) / peso;
+                let rg, aa, l, na, ca, k, p, qinp;
+
+                if (hasLipidi) {
+                    // Formule Foglio 1: Con lipidi
+                    rg = (velocita * 9 / 6) / peso;
+                    aa = ((velocita * 24) * 7) / (320 * peso);
+                    l = ((velocita * 24) * 6) / (320 * peso);
+                    na = ((velocita * 24) * 8) / (320 * peso);
+                    ca = ((velocita * 24) * 144.9) / (320 * peso);
+                    k = ((velocita * 24) * 3.99) / (320 * peso);
+                    p = ((velocita * 24) * 160.1) / (320 * peso); 
+                    qinp = (velocita * 24) / peso;
+                } else {
+                    // Formule Foglio 2: Senza lipidi (volume totale 290 ml)
+                    rg = (velocita * 10) / (6 * peso);
+                    aa = ((velocita * 24) * 7) / (290 * peso);
+                    l = 0; // Lipidi assenti
+                    na = ((velocita * 24) * 8) / (290 * peso);
+                    ca = ((velocita * 24) * 144.9) / (290 * peso);
+                    k = ((velocita * 24) * 3.99) / (290 * peso);
+                    p = ((velocita * 24) * 160.1) / (290 * peso); 
+                    qinp = (velocita * 24) / peso;
+                }
 
                 // Update UI rounded to 2 decimal places
                 outRG.textContent = rg.toFixed(2);
@@ -158,6 +195,7 @@
                 outNa.textContent = na.toFixed(2);
                 outCa.textContent = ca.toFixed(2);
                 outK.textContent = k.toFixed(2);
+                outP.textContent = p.toFixed(2);
                 outQiNP.textContent = qinp.toFixed(2);
             }
 
@@ -169,6 +207,7 @@
                 outNa.textContent = dash;
                 outCa.textContent = dash;
                 outK.textContent = dash;
+                outP.textContent = dash;
                 outQiNP.textContent = dash;
             }
 
