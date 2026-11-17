@@ -8,6 +8,7 @@
     <meta name="theme-color" content="#f97316">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="logo.png">
     <link id="manifest-link" rel="manifest">
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,6 +32,19 @@
     </style>
 </head>
 <body class="text-gray-800 antialiased min-h-screen flex flex-col items-center p-4 sm:p-6">
+
+    <!-- Banner Installazione iOS (Nascosto di default) -->
+    <div id="ios-install-prompt" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-white p-4 rounded-xl shadow-xl border border-orange-100 z-50 flex items-center justify-between">
+        <div class="flex-1 pr-3">
+            <p class="text-sm text-gray-800 font-semibold mb-1">Installa su iPhone/iPad</p>
+            <p class="text-xs text-gray-600 leading-snug">Tocca <span class="font-bold">Condividi</span> (il quadrato con la freccia) e poi <span class="font-bold">Aggiungi a schermata Home</span>.</p>
+        </div>
+        <button id="close-ios-prompt" class="text-gray-400 hover:text-gray-600 p-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
 
     <div class="w-full max-w-md w-full pb-10">
         <!-- Header -->
@@ -217,6 +231,32 @@
 
             // Run once on load to populate defaults
             updateCalculations();
+
+            // --- Rilevamento iOS per banner di installazione ---
+            const isIos = () => {
+                const userAgent = window.navigator.userAgent.toLowerCase();
+                return /iphone|ipad|ipod/.test(userAgent);
+            };
+
+            // Controlla se l'app è già installata/aperta dalla schermata home
+            const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+
+            // Mostra il banner solo se è un dispositivo iOS, non è già installata, e l'utente non lo ha già chiuso
+            if (isIos() && !isInStandaloneMode()) {
+                const iosPrompt = document.getElementById('ios-install-prompt');
+                const closeBtn = document.getElementById('close-ios-prompt');
+                
+                if (!localStorage.getItem('iosPromptClosed')) {
+                    // Rimuovi la classe 'hidden' per renderlo visibile
+                    iosPrompt.classList.remove('hidden');
+                }
+
+                // Chiudi il banner e salva la scelta per non infastidire l'utente
+                closeBtn.addEventListener('click', () => {
+                    iosPrompt.classList.add('hidden');
+                    localStorage.setItem('iosPromptClosed', 'true');
+                });
+            }
         });
     </script>
 
