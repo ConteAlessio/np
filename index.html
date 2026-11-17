@@ -9,7 +9,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="apple-touch-icon" href="logo.png">
-    <link id="manifest-link" rel="manifest">
+    
+    <!-- Modifica Principale: Carichiamo il file manifest reale invece di generarlo -->
+    <link rel="manifest" href="manifest.json">
+    
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter -->
@@ -55,7 +58,7 @@
 
         <!-- Input Section -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
-            <h2 class="text-lg font-semibold mb-4 text-gray-700">NP CNR VLBW</h2>
+            <h2 class="text-lg font-semibold mb-4 text-gray-700">CNR VLBW</h2>
             
             <!-- Interruttore Con/Senza Lipidi -->
             <div class="flex bg-gray-100 rounded-xl p-1 mb-5">
@@ -241,46 +244,36 @@
             // Controlla se l'app è già installata/aperta dalla schermata home
             const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
 
-            // Mostra il banner solo se è un dispositivo iOS, non è già installata, e l'utente non lo ha già chiuso
+            // Mostra il banner solo se è un dispositivo iOS e NON è aperta come app installata
             if (isIos() && !isInStandaloneMode()) {
                 const iosPrompt = document.getElementById('ios-install-prompt');
                 const closeBtn = document.getElementById('close-ios-prompt');
                 
-                if (!localStorage.getItem('iosPromptClosed')) {
-                    // Rimuovi la classe 'hidden' per renderlo visibile
-                    iosPrompt.classList.remove('hidden');
-                }
+                // Mostra sempre il banner finché non viene installata
+                iosPrompt.classList.remove('hidden');
 
-                // Chiudi il banner e salva la scelta per non infastidire l'utente
+                // Chiudi il banner solo per la sessione corrente
                 closeBtn.addEventListener('click', () => {
                     iosPrompt.classList.add('hidden');
-                    localStorage.setItem('iosPromptClosed', 'true');
                 });
             }
         });
     </script>
 
-    <!-- PWA Installation Script -->
+    <!-- PWA Registration Script -->
     <script>
-        // Genera il Manifest per l'installazione
-        const manifest = {
-            name: "NP BOT",
-            short_name: "NP BOT",
-            description: "Calcolatore Infusione Medica",
-            start_url: window.location.href.split('?')[0] || ".",
-            display: "standalone",
-            background_color: "#f3f4f6",
-            theme_color: "#f97316",
-            icons: [{
-                src: "logo.png", // Puntatore al tuo file caricato
-                sizes: "512x512",
-                type: "image/png",
-                purpose: "any maskable"
-            }]
-        };
-
-        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-        document.getElementById('manifest-link').href = URL.createObjectURL(manifestBlob);
+        // Registra il Service Worker per abilitare il vero funzionamento offline e l'installazione nativa
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registrato con successo:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Registrazione ServiceWorker fallita:', error);
+                    });
+            });
+        }
     </script>
 </body>
 </html>
