@@ -222,14 +222,7 @@
 
     <!-- PWA Installation Script -->
     <script>
-        // 1. Genera l'icona dinamicamente in formato SVG (Croce medica arancione)
-        const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-            <rect width="512" height="512" rx="112" fill="#f97316"/>
-            <path d="M256 160 v192 M160 256 h192" stroke="white" stroke-width="48" stroke-linecap="round"/>
-        </svg>`;
-        const iconDataUri = 'data:image/svg+xml;base64,' + btoa(svgIcon);
-
-        // 2. Genera il Manifest per l'installazione
+        // Genera il Manifest per l'installazione
         const manifest = {
             name: "NP BOT",
             short_name: "NP BOT",
@@ -238,21 +231,16 @@
             display: "standalone",
             background_color: "#f3f4f6",
             theme_color: "#f97316",
-           icons: [{
-    src: "logo.png",
-    sizes: "512x512",
-    type: "image/png",
-    purpose: "any maskable"
-}]
+            icons: [{
+                src: "logo.png", // Puntatore al tuo file caricato
+                sizes: "512x512",
+                type: "image/png",
+                purpose: "any maskable"
+            }]
         };
 
         const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
         document.getElementById('manifest-link').href = URL.createObjectURL(manifestBlob);
-
-        // La registrazione del Service Worker tramite "blob:" è stata rimossa
-        // poiché non supportata per motivi di sicurezza nei browser.
-        // Il file manifest generato sopra è sufficiente per i convertitori Web-to-APK
-        // e per la funzione "Aggiungi a schermata Home" nella maggior parte dei dispositivi.
     </script>
 </body>
 </html>
