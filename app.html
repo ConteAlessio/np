@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NP BOT</title>
+     <script>
+        if (localStorage.getItem('np_auth') !== 'true') {
+            window.location.href = 'index.html';
+        }
+    </script>
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#f97316">
     <meta name="apple-mobile-web-app-capable" content="yes">
