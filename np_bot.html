@@ -220,39 +220,5 @@
         });
     </script>
 
-    <!-- PWA Installation Script -->
-    <script>
-        // 1. Genera l'icona dinamicamente in formato SVG (Croce medica verde acqua)
-        const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-            <rect width="512" height="512" rx="112" fill="#14b8a6"/>
-            <path d="M256 160 v192 M160 256 h192" stroke="white" stroke-width="48" stroke-linecap="round"/>
-        </svg>`;
-        const iconDataUri = 'data:image/svg+xml;base64,' + btoa(svgIcon);
-
-        // 2. Genera il Manifest per l'installazione
-        const manifest = {
-            name: "NP BOT - G13",
-            short_name: "NP BOT",
-            description: "Calcolatore Infusione Medica G13",
-            start_url: window.location.href.split('?')[0] || ".",
-            display: "standalone",
-            background_color: "#f3f4f6",
-            theme_color: "#14b8a6",
-            icons: [{
-                src: iconDataUri,
-                sizes: "512x512",
-                type: "image/svg+xml",
-                purpose: "any maskable"
-            }]
-        };
-
-        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-        document.getElementById('manifest-link').href = URL.createObjectURL(manifestBlob);
-
-        // La registrazione del Service Worker tramite "blob:" è stata rimossa
-        // poiché non supportata per motivi di sicurezza nei browser.
-        // Il file manifest generato sopra è sufficiente per i convertitori Web-to-APK
-        // e per la funzione "Aggiungi a schermata Home" nella maggior parte dei dispositivi.
-    </script>
 </body>
 </html>
